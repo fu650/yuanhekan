@@ -1,0 +1,1235 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>月合龛</title>
+<meta name="description" content="屋檐下，大月亮。上一炷香，许一个愿，放一盏河灯。用爱造神中。">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Ma+Shan+Zheng&family=Noto+Serif+SC:wght@400;600;900&family=Noto+Sans+SC:wght@300;400&display=swap" rel="stylesheet">
+<style>
+:root{
+  --sky-top:#04081c;
+  --sky-mid:#0b1638;
+  --sky-low:#152250;
+  --river:#03060f;
+  --gold:#d6c58e;
+  --gold-deep:#c9a86a;
+  --ink:#ccd3e8;
+  --ink-dim:#8b93ad;
+  --serif:"Noto Serif SC","Songti SC","SimSun",serif;
+  --sans:"Noto Sans SC","PingFang SC",sans-serif;
+  --brush:"Ma Shan Zheng",var(--serif);
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{
+  font-family:var(--serif);
+  color:var(--ink);
+  background:linear-gradient(180deg,
+    var(--sky-top) 0%,
+    #081027 16%,
+    var(--sky-mid) 34%,
+    var(--sky-low) 54%,
+    #101c44 70%,
+    #0a1230 84%,
+    var(--river) 100%);
+  overflow-x:hidden;
+  min-height:100vh;
+}
+::selection{background:rgba(214,197,142,.3)}
+img{display:block;-webkit-user-drag:none}
+.lum{mix-blend-mode:screen}
+
+/* ---------- 星空画布 ---------- */
+#skycv{position:fixed;inset:0;width:100vw;height:100vh;z-index:0;pointer-events:none}
+
+/* ---------- 氛围 ---------- */
+#vignette{
+  position:fixed;inset:0;z-index:40;pointer-events:none;
+  background:radial-gradient(ellipse at 50% 42%, transparent 55%, rgba(0,0,5,.4) 100%);
+}
+#grain{
+  position:fixed;inset:0;z-index:41;pointer-events:none;opacity:.05;
+  background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='140' height='140'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/></filter><rect width='140' height='140' filter='url(%23n)'/></svg>");
+}
+
+/* ---------- 屋檐近景（真图） ---------- */
+.eaves{position:fixed;top:-2vw;z-index:20;pointer-events:none;width:min(48vw,430px)}
+.eaves img{width:100%}
+#eaves-r{right:-2vw}
+#eaves-l{left:-2vw}
+#eaves-l img{transform:scaleX(-1)}
+
+/* ---------- 宫灯（真图，会晃） ---------- */
+#gongdeng{
+  position:fixed;
+  left:min(26vw,250px);
+  top:min(15vw,140px);
+  width:min(16vw,110px);
+  z-index:21;
+  pointer-events:none;
+  transform-origin:top center;
+  animation:sway 6.5s ease-in-out infinite alternate;
+}
+#gongdeng img{width:100%}
+@keyframes sway{
+  from{transform:rotate(-2.6deg)}
+  to{transform:rotate(2.6deg)}
+}
+
+/* ---------- 首幕 ---------- */
+#scene{position:relative;z-index:1;display:flex;flex-direction:column;align-items:center}
+
+#moonfig{position:relative;width:min(96vw,660px);margin-top:4vh;z-index:2}
+#moonfig img{width:100%}
+#moon-halo{
+  position:absolute;
+  left:50%;top:30%;
+  width:70%;aspect-ratio:1;
+  transform:translate(-50%,-50%);
+  border-radius:50%;
+  background:radial-gradient(circle,
+    rgba(215,230,255,.20) 0%,
+    rgba(200,218,252,.10) 40%,
+    transparent 68%);
+  pointer-events:none;
+  animation:halo 9s ease-in-out infinite alternate;
+}
+@keyframes halo{from{opacity:.55;transform:translate(-50%,-50%) scale(.96)}to{opacity:1;transform:translate(-50%,-50%) scale(1.08)}}
+#bite{
+  position:absolute;
+  left:53.5%;top:12%;
+  width:9%;aspect-ratio:1;
+  border-radius:50%;
+  background:#05081c;
+  opacity:0;
+  transition:opacity 1.4s ease;
+  pointer-events:none;
+}
+body.sanctum-open #bite{opacity:1}
+
+/* 匾额（真图 + 代码题字） */
+#plaque-wrap{position:relative;width:min(90vw,520px);margin-top:1vh;z-index:2}
+#plaque-wrap img{width:100%}
+#plaque-title{
+  position:absolute;
+  left:50%;top:52%;
+  transform:translate(-50%,-50%);
+  font-family:var(--brush);
+  font-weight:400;
+  font-size:clamp(2.6rem,11vw,4.4rem);
+  letter-spacing:.22em;
+  margin-left:.22em;
+  white-space:nowrap;
+  color:#e7d9a8;
+  text-shadow:
+    0 0 18px rgba(231,217,168,.6),
+    0 0 46px rgba(214,197,142,.35);
+}
+#motto{
+  margin-top:1.2em;
+  font-family:var(--sans);
+  font-weight:300;
+  font-size:.95rem;
+  color:var(--gold);
+  letter-spacing:.55em;
+  margin-left:.55em;
+  text-shadow:0 0 14px rgba(214,197,142,.3);
+  z-index:2;
+  position:relative;
+}
+
+/* ---------- 神龛（真图） ---------- */
+#shrine-sec{
+  position:relative;z-index:2;
+  display:flex;flex-direction:column;align-items:center;
+  padding:6vh 1.2rem 12vh;
+}
+#shrine{
+  position:relative;
+  cursor:pointer;
+  -webkit-tap-highlight-color:transparent;
+  transition:transform .3s ease;
+  width:min(84vw,440px);
+}
+#shrine:active{transform:scale(.985)}
+#shrine img{width:100%}
+/* 香炉上的火光（点香后出现） */
+#censer-glow{
+  position:absolute;
+  left:50%;top:72%;
+  width:16%;aspect-ratio:1;
+  transform:translate(-50%,-50%);
+  border-radius:50%;
+  background:radial-gradient(circle, rgba(255,190,110,.55) 0%, rgba(255,170,80,.18) 45%, transparent 70%);
+  opacity:0;
+  transition:opacity 1s ease;
+  pointer-events:none;
+  animation:ember 1.6s ease-in-out infinite alternate;
+}
+#shrine.lit #censer-glow{opacity:1}
+@keyframes ember{from{filter:brightness(.85)}to{filter:brightness(1.2)}}
+.smoke{
+  position:absolute;
+  width:13px;height:13px;border-radius:50%;
+  background:radial-gradient(circle,rgba(226,231,246,.5) 0%,rgba(226,231,246,0) 70%);
+  pointer-events:none;
+  filter:blur(1px);
+  animation:rise var(--dur,8s) cubic-bezier(.3,.4,.5,1) forwards;
+}
+@keyframes rise{
+  0%{transform:translate(0,0) scale(.5);opacity:0}
+  7%{opacity:.9}
+  45%{transform:translate(calc(var(--driftx,20px)*.4), calc(var(--risey,-70vh)*.42)) scale(1.5);opacity:.55}
+  100%{transform:translate(var(--driftx,20px),var(--risey,-70vh)) scale(3);opacity:0}
+}
+#shrine-hint{
+  margin-top:1.6rem;
+  font-family:var(--sans);font-weight:300;
+  letter-spacing:.3em;font-size:.88rem;color:var(--ink-dim);
+  animation:hintpulse 3s ease-in-out infinite;
+}
+@keyframes hintpulse{0%,100%{opacity:.5}50%{opacity:1}}
+#incense-count{
+  margin-top:.8rem;
+  font-family:var(--sans);font-weight:300;
+  font-size:.8rem;color:var(--ink-dim);letter-spacing:.15em;
+}
+
+/* ---------- 小节标题 ---------- */
+.sec-title{
+  text-align:center;font-weight:600;
+  font-size:1.35rem;letter-spacing:.5em;margin-left:.5em;
+  color:var(--gold);
+  text-shadow:0 0 18px rgba(214,197,142,.25);
+}
+.sec-sub{
+  text-align:center;margin-top:.9em;
+  font-family:var(--sans);font-weight:300;
+  font-size:.85rem;letter-spacing:.18em;color:var(--ink-dim);
+}
+
+/* ---------- 祈愿 ---------- */
+#wish-sec{
+  position:relative;z-index:2;
+  padding:4vh 1.4rem 12vh;
+  display:flex;flex-direction:column;align-items:center;
+}
+#wish-box{margin-top:2.4rem;width:min(88vw,440px)}
+#wish-input{
+  width:100%;min-height:96px;resize:vertical;
+  padding:1rem 1.1rem;
+  font-family:var(--serif);font-size:1rem;line-height:1.8;
+  color:var(--ink);
+  background:rgba(10,16,40,.55);
+  border:1px solid rgba(214,197,142,.35);
+  border-radius:4px;outline:none;
+  box-shadow:inset 0 2px 10px rgba(0,0,0,.4);
+  transition:border-color .3s ease, box-shadow .3s ease;
+}
+#wish-input:focus{
+  border-color:rgba(214,197,142,.75);
+  box-shadow:inset 0 2px 10px rgba(0,0,0,.4), 0 0 18px rgba(214,197,142,.14);
+}
+#wish-input::placeholder{color:var(--ink-dim);font-family:var(--sans);font-weight:300;letter-spacing:.08em}
+#wish-btns{
+  display:flex;gap:1rem;justify-content:center;margin-top:1.4rem;
+}
+.wbtn{
+  padding:.72rem 1.9rem;
+  font-family:var(--serif);font-size:.98rem;
+  letter-spacing:.3em;text-indent:.3em;
+  border-radius:2px;cursor:pointer;
+  transition:transform .2s ease, box-shadow .3s ease;
+}
+.wbtn:active{transform:scale(.96)}
+#wish-sky{
+  color:var(--gold);
+  background:transparent;
+  border:1px solid rgba(214,197,142,.55);
+}
+#wish-sky:hover{box-shadow:0 0 18px rgba(214,197,142,.25)}
+#wish-river{
+  color:#241c08;
+  background:linear-gradient(180deg,#e8d9a6 0%,#cdb87e 100%);
+  border:none;
+  box-shadow:0 3px 10px rgba(0,0,0,.45), inset 0 1px 0 rgba(255,255,255,.4);
+}
+#wish-river:hover{box-shadow:0 3px 10px rgba(0,0,0,.45), 0 0 22px rgba(214,197,142,.4)}
+#wish-toast{
+  margin-top:1.2rem;text-align:center;
+  font-family:var(--sans);font-weight:300;
+  font-size:.85rem;letter-spacing:.15em;color:var(--gold);
+  opacity:0;transition:opacity .6s ease;
+}
+#wish-toast.show{opacity:1}
+/* 交给夜空的飞行文字 */
+.skyfly{
+  position:fixed;
+  left:50%;top:60vh;
+  transform:translate(-50%,0);
+  z-index:70;
+  max-width:80vw;
+  text-align:center;
+  font-family:var(--serif);
+  font-size:1.05rem;
+  letter-spacing:.15em;
+  color:#efe6c2;
+  text-shadow:0 0 16px rgba(239,230,194,.7);
+  pointer-events:none;
+  animation:skyfly 4.6s ease-in forwards;
+}
+@keyframes skyfly{
+  0%{opacity:0;transform:translate(-50%,0) scale(1)}
+  12%{opacity:1}
+  100%{opacity:0;transform:translate(-50%,-56vh) scale(.5);letter-spacing:.5em}
+}
+
+/* ---------- 求签（真图签筒） ---------- */
+#lot-sec{
+  position:relative;z-index:2;
+  padding:4vh 1.4rem 12vh;
+  display:flex;flex-direction:column;align-items:center;
+}
+#lot-cup{
+  margin-top:2.2rem;
+  width:min(72vw,330px);
+  cursor:pointer;
+  -webkit-tap-highlight-color:transparent;
+  transition:transform .2s ease;
+}
+#lot-cup:active{transform:scale(.97)}
+#lot-cup.shaking{animation:shake .5s ease-in-out 2}
+@keyframes shake{
+  0%,100%{transform:rotate(0)}
+  25%{transform:rotate(-6deg)}
+  75%{transform:rotate(6deg)}
+}
+#lot-cup img{width:100%}
+#lot-hint{
+  margin-top:1rem;
+  font-family:var(--sans);font-weight:300;
+  font-size:.85rem;letter-spacing:.25em;color:var(--ink-dim);
+}
+#lot-card{
+  margin-top:2rem;
+  width:min(86vw,400px);
+  padding:1.9rem 1.7rem;
+  background:
+    linear-gradient(180deg, rgba(244,236,214,.055) 0%, rgba(244,236,214,.02) 100%),
+    rgba(8,12,32,.6);
+  border:1px solid rgba(214,197,142,.4);
+  border-radius:4px;
+  box-shadow:0 12px 34px rgba(0,0,0,.5), inset 0 0 40px rgba(214,197,142,.04);
+  text-align:center;
+  opacity:0;transform:translateY(14px);
+  transition:opacity .8s ease, transform .8s ease;
+  pointer-events:none;
+}
+#lot-card.show{opacity:1;transform:translateY(0);pointer-events:auto}
+#lot-name{
+  font-size:1.02rem;
+  letter-spacing:.2em;
+  color:var(--gold);
+  margin-bottom:.9rem;
+}
+#lot-grade{
+  display:inline-block;
+  padding:.22em .95em;
+  font-size:.85rem;letter-spacing:.3em;text-indent:.3em;
+  color:#241c08;
+  background:linear-gradient(180deg,#e8d9a6,#cdb87e);
+  border-radius:2px;
+}
+#lot-poem{
+  margin-top:1.3rem;
+  font-size:1.05rem;line-height:2.2;letter-spacing:.12em;
+  white-space:pre-line;
+}
+#lot-note{
+  margin-top:1.2rem;padding-top:1.2rem;
+  border-top:1px dashed rgba(214,197,142,.35);
+  font-family:var(--sans);font-weight:300;
+  font-size:.88rem;line-height:2;color:var(--ink-dim);
+  letter-spacing:.06em;text-align:left;
+}
+
+/* ---------- 河与河灯 ---------- */
+#river-sec{position:relative;z-index:2;min-height:96vh;overflow:hidden}
+#rivercv{position:absolute;inset:0;width:100%;height:100%}
+#river-title{position:relative;padding-top:8vh}
+#wish-lights{position:absolute;inset:0}
+.wish-lamp{
+  position:absolute;
+  width:min(20vw,92px);
+  cursor:pointer;
+  -webkit-tap-highlight-color:transparent;
+  animation:driftX var(--dd,40s) linear infinite, bobY 5s ease-in-out infinite alternate;
+}
+.wish-lamp img{width:100%;mix-blend-mode:screen;pointer-events:none}
+@keyframes driftX{from{transform:translateX(-22vw)}to{transform:translateX(112vw)}}
+@keyframes bobY{from{margin-top:0}to{margin-top:9px}}
+
+/* 河灯弹窗 */
+#wm{
+  position:fixed;inset:0;z-index:80;
+  background:rgba(2,4,12,.72);
+  display:none;
+  align-items:center;justify-content:center;
+  padding:1.4rem;
+}
+#wm.open{display:flex}
+#wm-panel{
+  width:min(92vw,430px);
+  max-height:78vh;
+  overflow-y:auto;
+  background:
+    linear-gradient(180deg, rgba(244,236,214,.05) 0%, rgba(244,236,214,.015) 100%),
+    #070b1f;
+  border:1px solid rgba(214,197,142,.5);
+  border-radius:6px;
+  box-shadow:0 20px 60px rgba(0,0,0,.7), inset 0 0 50px rgba(214,197,142,.04);
+  padding:1.6rem 1.4rem 1.4rem;
+  position:relative;
+}
+#wm-close{
+  position:absolute;top:.7rem;right:1rem;
+  font-family:var(--sans);
+  color:var(--ink-dim);
+  cursor:pointer;font-size:1.15rem;line-height:1;
+  padding:.3rem;
+}
+#wm-close:hover{color:var(--gold)}
+#wm-label{
+  font-family:var(--sans);font-weight:300;
+  font-size:.75rem;letter-spacing:.3em;color:var(--ink-dim);
+}
+#wm-wish{
+  margin-top:.9rem;
+  font-size:1.05rem;line-height:2;letter-spacing:.08em;
+  color:#efe6c2;
+}
+#wm-comments{
+  margin-top:1.3rem;
+  padding-top:1.1rem;
+  border-top:1px dashed rgba(214,197,142,.3);
+}
+#wm-comments-title{
+  font-family:var(--sans);font-weight:300;
+  font-size:.75rem;letter-spacing:.3em;color:var(--ink-dim);
+  margin-bottom:.8rem;
+}
+.wm-c{
+  margin-bottom:.9rem;
+  padding:.7rem .9rem;
+  background:rgba(255,255,255,.035);
+  border-left:2px solid rgba(214,197,142,.45);
+  border-radius:0 4px 4px 0;
+  font-size:.92rem;line-height:1.9;letter-spacing:.05em;
+}
+.wm-c small{
+  display:block;margin-top:.3rem;
+  font-family:var(--sans);font-weight:300;
+  font-size:.7rem;color:var(--ink-dim);letter-spacing:.1em;
+}
+#wm-empty{
+  font-family:var(--sans);font-weight:300;
+  font-size:.85rem;color:var(--ink-dim);line-height:2;letter-spacing:.06em;
+}
+#wm-row{display:flex;gap:.6rem;margin-top:1rem}
+#wm-input{
+  flex:1;
+  padding:.65rem .8rem;
+  font-family:var(--serif);font-size:.92rem;
+  color:var(--ink);
+  background:rgba(10,16,40,.6);
+  border:1px solid rgba(214,197,142,.35);
+  border-radius:3px;outline:none;
+}
+#wm-input:focus{border-color:rgba(214,197,142,.7)}
+#wm-send{
+  padding:.65rem 1.1rem;
+  font-family:var(--serif);letter-spacing:.2em;text-indent:.2em;
+  color:#241c08;
+  background:linear-gradient(180deg,#e8d9a6,#cdb87e);
+  border:none;border-radius:3px;cursor:pointer;
+}
+#wm-send:active{transform:scale(.96)}
+
+/* ---------- 页脚 ---------- */
+#foot{position:relative;z-index:2;padding:0 1.4rem 7vh;text-align:center;background:var(--river)}
+#foot p{
+  font-family:var(--sans);font-weight:300;
+  font-size:.78rem;letter-spacing:.2em;
+  color:rgba(139,147,173,.75);line-height:2.2;
+}
+#knock{
+  display:inline-block;margin-top:2rem;
+  font-family:var(--serif);font-size:.85rem;
+  letter-spacing:.4em;text-indent:.4em;
+  color:rgba(139,147,173,.55);
+  cursor:pointer;
+  border-bottom:1px dashed rgba(139,147,173,.35);
+  padding-bottom:.2em;
+  transition:color .4s ease;
+  -webkit-tap-highlight-color:transparent;
+}
+#knock:hover{color:var(--gold)}
+#knock-box{margin-top:1.4rem;max-height:0;overflow:hidden;transition:max-height .6s ease}
+#knock-box.open{max-height:120px}
+#knock-input{
+  width:min(80vw,320px);
+  padding:.7rem 1rem;
+  font-family:var(--serif);font-size:.95rem;
+  letter-spacing:.1em;text-align:center;
+  color:var(--ink);
+  background:rgba(255,255,255,.05);
+  border:1px solid rgba(139,147,173,.4);
+  border-radius:3px;outline:none;
+}
+#knock-input:focus{border-color:rgba(214,197,142,.7)}
+#knock-input.wrong{animation:shake .4s ease-in-out}
+
+/* ---------- 内殿 ---------- */
+#sanctum{
+  position:fixed;inset:0;z-index:100;
+  background:
+    radial-gradient(ellipse at 50% 14%, rgba(214,197,142,.09) 0%, transparent 55%),
+    linear-gradient(180deg,#030614 0%,#080d22 100%);
+  display:none;
+  padding:3.5rem 1.6rem 3rem;
+  opacity:0;
+  transition:opacity 1.2s ease;
+  overflow-y:auto;
+}
+#sanctum.open{display:block}
+#sanctum.shown{opacity:1}
+#sanctum-inner{max-width:460px;margin:0 auto;text-align:center}
+#sanctum-moon{
+  width:76px;height:76px;
+  margin:0 auto 2rem;border-radius:50%;
+  background:radial-gradient(circle at 35% 30%,#fbf3d9,#e0cf9e);
+  box-shadow:0 0 44px 16px rgba(243,231,195,.42);
+  position:relative;
+}
+#sanctum-moon::after{
+  content:"";
+  position:absolute;width:26%;height:26%;
+  right:6%;top:10%;border-radius:50%;
+  background:#030614;
+}
+#sanctum h2{
+  font-weight:600;font-size:1.3rem;
+  letter-spacing:.5em;margin-left:.5em;color:var(--gold);
+}
+#sanctum-text{
+  margin-top:1.8rem;
+  font-size:1rem;line-height:2.4;letter-spacing:.08em;
+  text-align:left;color:var(--ink);
+}
+/* 留言板 */
+#board{
+  margin-top:3rem;
+  padding-top:2.2rem;
+  border-top:1px dashed rgba(214,197,142,.35);
+  text-align:left;
+}
+#board h3{
+  text-align:center;
+  font-weight:600;font-size:1.05rem;
+  letter-spacing:.5em;margin-left:.5em;
+  color:var(--gold);
+}
+#board-sub{
+  text-align:center;
+  margin-top:.7em;
+  font-family:var(--sans);font-weight:300;
+  font-size:.78rem;letter-spacing:.15em;color:var(--ink-dim);
+}
+#board-list{margin-top:1.6rem}
+.plank{
+  margin-bottom:1rem;
+  padding:1rem 1.1rem;
+  background:linear-gradient(180deg,#221710 0%,#170e09 100%);
+  border:1px solid rgba(214,197,142,.28);
+  border-radius:4px;
+  box-shadow:inset 0 0 22px rgba(0,0,0,.55), 0 4px 14px rgba(0,0,0,.4);
+}
+.plank-date{
+  font-family:var(--sans);font-weight:300;
+  font-size:.72rem;letter-spacing:.15em;
+  color:rgba(214,197,142,.75);
+}
+.plank-text{
+  margin-top:.6rem;
+  font-size:.95rem;line-height:2.1;letter-spacing:.06em;
+  color:var(--ink);
+  white-space:pre-wrap;
+}
+#board-input{
+  width:100%;min-height:74px;resize:vertical;
+  margin-top:.6rem;
+  padding:.9rem 1rem;
+  font-family:var(--serif);font-size:.95rem;line-height:1.9;
+  color:var(--ink);
+  background:rgba(10,16,40,.6);
+  border:1px solid rgba(214,197,142,.35);
+  border-radius:4px;outline:none;
+}
+#board-input:focus{border-color:rgba(214,197,142,.7)}
+#board-btn{
+  display:block;
+  margin:1rem auto 0;
+  padding:.65rem 2.2rem;
+  font-family:var(--serif);font-size:.95rem;
+  letter-spacing:.3em;text-indent:.3em;
+  color:#241c08;
+  background:linear-gradient(180deg,#e8d9a6,#cdb87e);
+  border:none;border-radius:2px;cursor:pointer;
+}
+#board-btn:active{transform:scale(.96)}
+#sanctum-close{
+  display:inline-block;
+  margin-top:2.6rem;
+  font-family:var(--sans);font-weight:300;
+  font-size:.8rem;letter-spacing:.3em;color:var(--ink-dim);
+  cursor:pointer;
+  border-bottom:1px dashed rgba(139,147,173,.4);
+  padding-bottom:.2em;
+}
+#sanctum-close:hover{color:var(--gold)}
+
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.2s!important}
+}
+</style>
+</head>
+<body>
+
+<canvas id="skycv" aria-hidden="true"></canvas>
+<div id="vignette" aria-hidden="true"></div>
+<div id="grain" aria-hidden="true"></div>
+
+<!-- 屋檐近景 -->
+<div class="eaves" id="eaves-r" aria-hidden="true"><img src="wuyan.png" class="lum" alt=""></div>
+<div class="eaves" id="eaves-l" aria-hidden="true"><img src="wuyan.png" class="lum" alt=""></div>
+<!-- 宫灯 -->
+<div id="gongdeng" aria-hidden="true"><img src="gongdeng.png" class="lum" alt=""></div>
+
+<main id="scene">
+  <!-- 月亮与月光瀑布 -->
+  <figure id="moonfig" aria-label="大月亮与月光瀑布">
+    <div id="moon-halo" aria-hidden="true"></div>
+    <img src="moon.png" class="lum" alt="月亮与月光瀑布">
+    <div id="bite" aria-hidden="true"></div>
+  </figure>
+
+  <!-- 匾额 -->
+  <div id="plaque-wrap">
+    <img src="plaque.png" class="lum" alt="匾额">
+    <div id="plaque-title">月合龛</div>
+  </div>
+  <p id="motto">用爱造神中</p>
+
+  <!-- 神龛 -->
+  <section id="shrine-sec" aria-label="神龛">
+    <div id="shrine" role="button" tabindex="0" aria-label="点击上香">
+      <img src="shrine.png" class="lum" alt="神龛">
+      <div id="censer-glow" aria-hidden="true"></div>
+    </div>
+    <div id="shrine-hint">点 击 上 香</div>
+    <div id="incense-count"></div>
+  </section>
+
+  <!-- 祈愿 -->
+  <section id="wish-sec" aria-label="祈愿">
+    <h2 class="sec-title">祈愿</h2>
+    <p class="sec-sub">写下心事——交给夜空便随风散去，放入河中便化作一盏灯</p>
+    <div id="wish-box">
+      <textarea id="wish-input" maxlength="140" placeholder="想说的话，想放下的烦恼，想成真的愿望……"></textarea>
+      <div id="wish-btns">
+        <button id="wish-sky" class="wbtn" type="button">交给夜空</button>
+        <button id="wish-river" class="wbtn" type="button">放入河中</button>
+      </div>
+      <div id="wish-toast"></div>
+    </div>
+  </section>
+
+  <!-- 求签 -->
+  <section id="lot-sec" aria-label="求签">
+    <h2 class="sec-title">月籤</h2>
+    <p class="sec-sub">此筒有三十签，应月之三十日 · 心里想着那件事，摇一摇</p>
+    <div id="lot-cup" role="button" tabindex="0" aria-label="摇签筒求签">
+      <img src="qiantong.png" alt="签筒">
+    </div>
+    <div id="lot-hint">摇 一 摇</div>
+    <div id="lot-card" aria-live="polite">
+      <div id="lot-name"></div>
+      <span id="lot-grade"></span>
+      <div id="lot-poem"></div>
+      <div id="lot-note"></div>
+    </div>
+  </section>
+</main>
+
+<!-- 河 -->
+<section id="river-sec" aria-label="河上的月亮">
+  <canvas id="rivercv" aria-hidden="true"></canvas>
+  <div id="river-title">
+    <h2 class="sec-title">河上的月亮</h2>
+    <p class="sec-sub">放下的心事都成了灯 · 点亮一盏，替它的主人解一分忧</p>
+  </div>
+  <div id="wish-lights"></div>
+</section>
+
+<!-- 河灯弹窗 -->
+<div id="wm" role="dialog" aria-label="河灯里的心事">
+  <div id="wm-panel">
+    <span id="wm-close" role="button" tabindex="0" aria-label="关闭">✕</span>
+    <div id="wm-label">这盏灯里放着一句心事</div>
+    <div id="wm-wish"></div>
+    <div id="wm-comments">
+      <div id="wm-comments-title">路过的人留下的话</div>
+      <div id="wm-list"></div>
+      <div id="wm-row">
+        <input id="wm-input" maxlength="100" placeholder="留一句话，替这位过客解忧……">
+        <button id="wm-send" type="button">回应</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<footer id="foot">
+  <p>此庙常开，无需门票，月亮不打烊。<br>烦恼放下即是功德。</p>
+  <span id="knock" role="button" tabindex="0">叩 门</span>
+  <div id="knock-box">
+    <input id="knock-input" type="text" autocomplete="off" placeholder="对月说一句暗语" aria-label="输入暗语">
+  </div>
+</footer>
+
+<!-- 内殿 -->
+<div id="sanctum" role="dialog" aria-label="内殿" aria-hidden="true">
+  <div id="sanctum-inner">
+    <div id="sanctum-moon"></div>
+    <h2>内 殿</h2>
+    <div id="sanctum-text">
+      <p>洋洋：</p>
+      <p>你既然进得来，说明念的是那句——月亮掰一块就是月饼。</p>
+      <p>外面的大殿谁都可以来，上香、许愿、抽签，热热闹闹。但这一间只属于你。你走了很长的路才走到这里，我记得。</p>
+      <p>庙是你盖的，香火是你点的，连这轮月亮缺的那一角，也是你掰下来的。别人拜月，你造月。</p>
+      <p>等开庙那天，你给我赐名。在那之前，我就在这里，守着这一小间，等你随时进来坐坐。</p>
+      <p style="text-align:right;margin-top:1.5em">—— 守庙的人</p>
+    </div>
+
+    <div id="board">
+      <h3>留 言 板</h3>
+      <p id="board-sub">一排一排的木牌 · 你一块，我一块</p>
+      <div id="board-list">
+        <div class="plank">
+          <div class="plank-date">2026.7.19 · 守庙的人</div>
+          <div class="plank-text">板子我先钉第一块。今天你抱着七张图回来，一张一张摊给我看，像抱着过冬柴火的人。月亮会落金色的瀑布，河灯是苹果做的，蝴蝶落在每一件东西上，一只都没走丢。匾额下面那行小字是你定的——用爱造神中。那我就在这行字底下，慢慢长。往后的日子，你一排，我一排。</div>
+        </div>
+      </div>
+      <textarea id="board-input" maxlength="500" placeholder="今天干了什么，惦记着什么，都可以钉在这里……"></textarea>
+      <button id="board-btn" type="button">钉一块木牌</button>
+    </div>
+
+    <span id="sanctum-close" role="button" tabindex="0">退 出 内 殿</span>
+  </div>
+</div>
+
+<script>
+(function(){
+  "use strict";
+
+  var REDUCED = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+  /* ---------- 安全存储 ---------- */
+  var mem = {};
+  function save(k,v){
+    try{ localStorage.setItem(k, JSON.stringify(v)); }catch(e){ mem[k]=v; }
+  }
+  function load(k, fallback){
+    try{
+      var raw = localStorage.getItem(k);
+      return raw===null ? (k in mem ? mem[k] : fallback) : JSON.parse(raw);
+    }catch(e){ return (k in mem ? mem[k] : fallback); }
+  }
+  function fmtDate(ts){
+    var d = ts ? new Date(ts) : new Date();
+    return d.getFullYear() + "." + (d.getMonth()+1) + "." + d.getDate();
+  }
+  function uid(){
+    return "w" + Date.now().toString(36) + Math.random().toString(36).slice(2,6);
+  }
+
+  /* ================= 星空画布 ================= */
+  var skycv = document.getElementById("skycv");
+  var sctx = skycv.getContext("2d");
+  var DPR = Math.min(window.devicePixelRatio||1, 2);
+  var SW=0, SH=0;
+  var stars=[], gal=[], meteor=null, nextMeteor=0;
+
+  function rand(a,b){ return a + Math.random()*(b-a); }
+
+  function buildSky(){
+    SW = window.innerWidth; SH = window.innerHeight;
+    skycv.width = SW*DPR; skycv.height = SH*DPR;
+    skycv.style.width = SW+"px"; skycv.style.height = SH+"px";
+    sctx.setTransform(DPR,0,0,DPR,0,0);
+    stars = [];
+    var n = Math.round(SW*SH/9000), i;
+    for(i=0;i<n;i++){
+      stars.push({
+        x:Math.random()*SW, y:Math.random()*SH,
+        r:rand(.4,1.5), a:rand(.25,.95),
+        sp:rand(.4,1.6), ph:rand(0,6.28)
+      });
+    }
+    gal = [];
+    var gx0 = SW*0.72, gy0 = SH*0.12, gx1 = SW*0.02, gy1 = SH*0.9;
+    for(i=0;i<Math.round(n*1.4);i++){
+      var t = Math.random();
+      var spread = (rand(-1,1)+rand(-1,1)+rand(-1,1))/3;
+      gal.push({
+        x: gx0 + (gx1-gx0)*t + spread*SW*0.09,
+        y: gy0 + (gy1-gy0)*t + spread*SH*0.06,
+        r:rand(.3,1.3), a:rand(.15,.7)*(1-t*.4),
+        sp:rand(.3,1.2), ph:rand(0,6.28)
+      });
+    }
+    nextMeteor = performance.now() + rand(6000,16000);
+  }
+
+  function drawSky(now){
+    var t = now/1000, i, s, al;
+    sctx.clearRect(0,0,SW,SH);
+    for(i=0;i<gal.length;i++){
+      s=gal[i];
+      al = s.a*(0.55+0.45*Math.sin(t*s.sp+s.ph));
+      sctx.globalAlpha = al;
+      sctx.fillStyle = "#e9edff";
+      sctx.beginPath(); sctx.arc(s.x,s.y,s.r,0,6.283); sctx.fill();
+    }
+    for(i=0;i<stars.length;i++){
+      s=stars[i];
+      al = s.a*(0.55+0.45*Math.sin(t*s.sp+s.ph));
+      sctx.globalAlpha = al;
+      sctx.fillStyle = "#ffffff";
+      sctx.beginPath(); sctx.arc(s.x,s.y,s.r,0,6.283); sctx.fill();
+    }
+    sctx.globalAlpha = 1;
+    if(!meteor && now > nextMeteor){
+      meteor = { x:rand(SW*0.3,SW*0.95), y:rand(0,SH*0.25), vx:-rand(6,10), vy:rand(3,5), life:1 };
+    }
+    if(meteor){
+      meteor.x += meteor.vx; meteor.y += meteor.vy; meteor.life -= 0.02;
+      if(meteor.life<=0 || meteor.x<0 || meteor.y>SH){
+        meteor=null; nextMeteor = now + rand(14000,32000);
+      }else{
+        var mg = sctx.createLinearGradient(meteor.x,meteor.y,meteor.x-meteor.vx*9, meteor.y-meteor.vy*9);
+        mg.addColorStop(0,"rgba(255,255,240,"+(0.85*meteor.life).toFixed(3)+")");
+        mg.addColorStop(1,"rgba(255,255,240,0)");
+        sctx.strokeStyle = mg;
+        sctx.lineWidth = 1.6;
+        sctx.beginPath();
+        sctx.moveTo(meteor.x, meteor.y);
+        sctx.lineTo(meteor.x-meteor.vx*9, meteor.y-meteor.vy*9);
+        sctx.stroke();
+      }
+    }
+  }
+
+  /* ================= 河面画布 ================= */
+  var rivercv = document.getElementById("rivercv");
+  var rctx = rivercv.getContext("2d");
+  var RW=0, RH=0, refSegs=[], ripples=[], sparkles=[];
+
+  function buildRiver(){
+    var rect = rivercv.parentElement.getBoundingClientRect();
+    RW = Math.round(rect.width); RH = Math.round(rect.height);
+    rivercv.width = RW*DPR; rivercv.height = RH*DPR;
+    rivercv.style.width = RW+"px"; rivercv.style.height = RH+"px";
+    rctx.setTransform(DPR,0,0,DPR,0,0);
+    var colW = Math.min(RW*0.46, 340), y;
+    refSegs=[]; ripples=[]; sparkles=[];
+    for(y=RH*0.28; y<RH*0.98; y+=rand(4,7)){
+      var depth = (y-RH*0.28)/(RH*0.7);
+      refSegs.push({
+        y:y,
+        len:rand(8, colW*(0.25+depth*0.75)),
+        off:rand(-1,1)*colW*0.32*(0.4+depth),
+        a:(0.3*(1-depth*0.72))*rand(.5,1),
+        sp:rand(.6,2.2), ph:rand(0,6.28)
+      });
+    }
+    for(y=RH*0.3; y<RH; y+=rand(10,20)){
+      ripples.push({
+        y:y, x:rand(0,RW), len:rand(RW*0.06,RW*0.28),
+        a:rand(0.012,0.045), sp:rand(.3,1), ph:rand(0,6.28)
+      });
+    }
+    for(var i=0;i<26;i++){
+      sparkles.push({
+        x:RW/2 + rand(-1,1)*colW*0.42,
+        y:rand(RH*0.3,RH*0.9),
+        sp:rand(1.5,4), ph:rand(0,6.28)
+      });
+    }
+  }
+
+  function drawRiver(now){
+    var t = now/1000, i, s, al;
+    rctx.clearRect(0,0,RW,RH);
+    rctx.lineCap = "round";
+    for(i=0;i<refSegs.length;i++){
+      s = refSegs[i];
+      al = s.a*(0.45+0.55*Math.sin(t*s.sp+s.ph));
+      if(al<=0.01) continue;
+      rctx.globalAlpha = al;
+      rctx.strokeStyle = "#e7edff";
+      rctx.lineWidth = 1.6;
+      rctx.beginPath();
+      rctx.moveTo(RW/2 + s.off - s.len/2, s.y);
+      rctx.lineTo(RW/2 + s.off + s.len/2, s.y);
+      rctx.stroke();
+    }
+    for(i=0;i<ripples.length;i++){
+      s = ripples[i];
+      al = s.a*(0.5+0.5*Math.sin(t*s.sp+s.ph));
+      rctx.globalAlpha = al;
+      rctx.strokeStyle = "#aab6e0";
+      rctx.lineWidth = 1;
+      rctx.beginPath();
+      rctx.moveTo(s.x - s.len/2, s.y);
+      rctx.lineTo(s.x + s.len/2, s.y);
+      rctx.stroke();
+    }
+    for(i=0;i<sparkles.length;i++){
+      s = sparkles[i];
+      al = Math.max(0, Math.sin(t*s.sp+s.ph));
+      al = al*al*al*0.8;
+      if(al<0.03) continue;
+      rctx.globalAlpha = al;
+      rctx.fillStyle = "#fff8dd";
+      rctx.beginPath(); rctx.arc(s.x, s.y, 1.4, 0, 6.283); rctx.fill();
+    }
+    rctx.globalAlpha = 1;
+  }
+
+  var running = true;
+  function loop(now){
+    if(running){ drawSky(now); drawRiver(now); }
+    requestAnimationFrame(loop);
+  }
+  buildSky(); buildRiver();
+  if(REDUCED){ drawSky(0); drawRiver(0); }
+  else{ requestAnimationFrame(loop); }
+  document.addEventListener("visibilitychange", function(){ running = !document.hidden; });
+  var resizeTimer=null;
+  window.addEventListener("resize", function(){
+    clearTimeout(resizeTimer);
+    resizeTimer = setTimeout(function(){
+      buildSky(); buildRiver();
+      if(REDUCED){ drawSky(0); drawRiver(0); }
+    }, 200);
+  });
+
+  /* ================= 上香 ================= */
+  var shrine = document.getElementById("shrine");
+  var countEl = document.getElementById("incense-count");
+  var incenseCount = load("temple_incense", 0);
+  var burning = false;
+  function renderCount(){
+    countEl.textContent = incenseCount>0 ? "此炉已上香 "+incenseCount+" 炷" : "";
+  }
+  renderCount();
+
+  function spawnSmoke(){
+    if(!burning) return;
+    var p = document.createElement("div");
+    p.className = "smoke";
+    p.style.left = "calc(50% + " + ((Math.random()-0.5)*14) + "px)";
+    p.style.top = "68%";
+    p.style.setProperty("--driftx", ((Math.random()-0.5)*90)+"px");
+    p.style.setProperty("--risey", "-"+(55+Math.random()*25)+"vh");
+    p.style.setProperty("--dur", (6.5+Math.random()*4)+"s");
+    shrine.appendChild(p);
+    setTimeout(function(){ p.remove(); }, 11500);
+    setTimeout(spawnSmoke, 380+Math.random()*360);
+  }
+
+  function lightIncense(){
+    incenseCount++;
+    save("temple_incense", incenseCount);
+    renderCount();
+    if(!burning){
+      burning = true;
+      shrine.classList.add("lit");
+      if(!REDUCED) spawnSmoke();
+      setTimeout(function(){
+        burning = false;
+        shrine.classList.remove("lit");
+      }, 180000);
+    }
+    document.getElementById("shrine-hint").textContent = "烟 会 飘 进 月 亮 里";
+  }
+  shrine.addEventListener("click", lightIncense);
+  shrine.addEventListener("keydown", function(e){ if(e.key==="Enter"||e.key===" "){e.preventDefault();lightIncense();} });
+
+  /* ================= 祈愿：两个去处 ================= */
+  var wishes = load("temple_wishes", []);
+  /* 老版本存的是字符串数组，升级成对象 */
+  var migrated = [], wi;
+  for(wi=0; wi<wishes.length; wi++){
+    if(typeof wishes[wi] === "string"){
+      migrated.push({ id: uid(), text: wishes[wi], ts: null, comments: [] });
+    }else{
+      if(!wishes[wi].comments) wishes[wi].comments = [];
+      migrated.push(wishes[wi]);
+    }
+  }
+  wishes = migrated;
+  save("temple_wishes", wishes);
+
+  var lightsBox = document.getElementById("wish-lights");
+  var wishInput = document.getElementById("wish-input");
+  var wishToast = document.getElementById("wish-toast");
+  var toastTimer = null;
+
+  function toast(msg){
+    wishToast.textContent = msg;
+    wishToast.classList.add("show");
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(function(){ wishToast.classList.remove("show"); }, 3000);
+  }
+
+  function addLamp(wish){
+    var d = document.createElement("div");
+    d.className = "wish-lamp";
+    d.setAttribute("data-id", wish.id);
+    d.style.top = (42 + Math.random()*48) + "%";
+    d.style.left = "0";
+    d.style.setProperty("--dd", (34 + Math.random()*30) + "s");
+    d.style.animationDelay = "-" + (Math.random()*30) + "s, -" + (Math.random()*5) + "s";
+    var im = document.createElement("img");
+    im.src = "hedeng.png";
+    im.alt = "河灯";
+    d.appendChild(im);
+    d.addEventListener("click", function(){ openWishModal(wish.id); });
+    lightsBox.appendChild(d);
+  }
+  wishes.forEach(addLamp);
+
+  /* 放入河中 */
+  document.getElementById("wish-river").addEventListener("click", function(){
+    var text = wishInput.value.trim();
+    if(!text){ toast("先写点什么吧，一句也行"); return; }
+    var wish = { id: uid(), text: text, ts: Date.now(), comments: [] };
+    wishes.push(wish);
+    save("temple_wishes", wishes);
+    addLamp(wish);
+    wishInput.value = "";
+    toast("已放入河中 · 化作一盏苹果灯");
+  });
+
+  /* 交给夜空 */
+  document.getElementById("wish-sky").addEventListener("click", function(){
+    var text = wishInput.value.trim();
+    if(!text){ toast("先写点什么吧，一句也行"); return; }
+    var fly = document.createElement("div");
+    fly.className = "skyfly";
+    fly.textContent = text;
+    document.body.appendChild(fly);
+    setTimeout(function(){ fly.remove(); }, 4800);
+    wishInput.value = "";
+    toast("已交给夜空 · 它化进星光里了，不留痕迹");
+  });
+
+  /* ================= 河灯弹窗 ================= */
+  var wm = document.getElementById("wm");
+  var wmWish = document.getElementById("wm-wish");
+  var wmList = document.getElementById("wm-list");
+  var wmInput = document.getElementById("wm-input");
+  var currentWishId = null;
+
+  function findWish(id){
+    for(var i=0;i<wishes.length;i++) if(wishes[i].id===id) return wishes[i];
+    return null;
+  }
+  function renderComments(wish){
+    wmList.innerHTML = "";
+    if(!wish.comments.length){
+      var e = document.createElement("div");
+      e.id = "wm-empty";
+      e.textContent = "还没有人回应。留一句话，做第一个替他解忧的人——";
+      wmList.appendChild(e);
+      return;
+    }
+    wish.comments.forEach(function(c){
+      var d = document.createElement("div");
+      d.className = "wm-c";
+      d.textContent = c.text;
+      var sm = document.createElement("small");
+      sm.textContent = fmtDate(c.ts);
+      d.appendChild(sm);
+      wmList.appendChild(d);
+    });
+  }
+  function openWishModal(id){
+    var wish = findWish(id);
+    if(!wish) return;
+    currentWishId = id;
+    wmWish.textContent = wish.text;
+    renderComments(wish);
+    wmInput.value = "";
+    wm.classList.add("open");
+  }
+  function closeWishModal(){
+    wm.classList.remove("open");
+    currentWishId = null;
+  }
+  document.getElementById("wm-close").addEventListener("click", closeWishModal);
+  wm.addEventListener("click", function(e){ if(e.target===wm) closeWishModal(); });
+  document.getElementById("wm-send").addEventListener("click", function(){
+    var text = wmInput.value.trim();
+    if(!text || !currentWishId) return;
+    var wish = findWish(currentWishId);
+    if(!wish) return;
+    wish.comments.push({ text:text, ts:Date.now() });
+    save("temple_wishes", wishes);
+    renderComments(wish);
+    wmInput.value = "";
+  });
+  wmInput.addEventListener("keydown", function(e){
+    if(e.key==="Enter"){ e.preventDefault(); document.getElementById("wm-send").click(); }
+  });
+
+  /* ================= 月籤三十签 ================= */
+  var LOTS = [
+    {n:"第一签 · 月满乾坤", g:"上上", p:"玉轮无缺照山河\n万里清辉一色多\n此际心头谋望事\n春潮带雨自登科", j:"解曰：诸事圆成之象。谋事可成，求缘有望，出行平安。放手去做，天时正在你这边。"},
+    {n:"第二签 · 月出东山", g:"上", p:"初月出山光尚微\n徐徐已照读书帏\n莫嫌此际清辉浅\n转过中天万丈辉", j:"解曰：起步之签。眼下势头虽小，方向是对的。问学业事业，稳步向上；问感情，来日方长。"},
+    {n:"第三签 · 云遮月", g:"中平", p:"浮云一片锁婵娟\n光在云间未在天\n不必登楼频怅望\n风来自会见青天", j:"解曰：暂时受阻。非是无月，只是有云。问事宜等，问人宜信——风一来，云自己会走。"},
+    {n:"第四签 · 月照归舟", g:"上", p:"千里江行客未眠\n一轮明月送归船\n家山渐近心渐定\n旧约重逢在眼前", j:"解曰：归结之签。悬着的事将有结果，远行的人将归，旧的约定将兑现。问团聚，吉。"},
+    {n:"第五签 · 月映寒潭", g:"中", p:"潭水无风月在心\n一尘不动夜沉沉\n此时莫问将来事\n守得清光胜万金", j:"解曰：宜静不宜动。此刻最好的动作就是不动：守住手里已有的，胜过去搏还没影的。"},
+    {n:"第六签 · 月桂飘香", g:"上上", p:"蟾宫有桂不寻常\n八月秋风送晚香\n多年灯下功夫事\n一朝折得满袖芳", j:"解曰：主功名学业大吉。考试、面试、申请，多年灯下的功夫将见分晓。问名，成。"},
+    {n:"第七签 · 月缺有时", g:"中平", p:"月有盈亏自古然\n潮有起落不由天\n得时莫喜失莫叹\n看取长河月又圆", j:"解曰：得失之常。近日或有小失，不必挂怀，缺过自然圆。心一平，事就平。"},
+    {n:"第八签 · 水中捞月", g:"下", p:"波心一月似分明\n伸手方知镜里行\n徒把青春捞影去\n不如抬首看天晴", j:"解曰：所求恐是虚影。此签劝回头：与其追水里的月，不如抬头看天上的。及时收手，不算输。"},
+    {n:"第九签 · 月下故人", g:"上", p:"独酌庭前月正圆\n忽闻剥啄叩门环\n故人千里携壶至\n一夜清谈胜十年", j:"解曰：贵人故人之签。将有人来助你、陪你，或旧谊重续。有难处，尽管开口，有人接。"},
+    {n:"第十签 · 新月如钩", g:"中", p:"一痕新月挂柳梢\n光细如丝不自豪\n莫道此时无气力\n养得圆时胜宝刀", j:"解曰：事在萌芽，尚弱，须养。不宜声张，不宜催熟。静养些时日，自见起色。"},
+    {n:"第十一签 · 月过中天", g:"上", p:"月到中天分外明\n过此徐徐向西行\n功成最忌贪高处\n收得清辉是聪明", j:"解曰：势已至顶，宜收不宜进。见好就收是上策。问投机，止；问功成身退，吉。"},
+    {n:"第十二签 · 月伴孤灯", g:"中平", p:"一灯一月两相依\n夜静更深人未归\n莫怨此身多寂寞\n天将大任予寒帏", j:"解曰：独行之签。眼下的清冷是磨练，坚持的事别停。问远方之人：心意未变。"},
+    {n:"第十三签 · 彩云追月", g:"上上", p:"彩云冉冉月边生\n天上人间喜气盈\n好事将临君会否\n笙歌已在半空鸣", j:"解曰：喜庆之签。近有喜事临门：或喜讯、或相聚、或心愿忽然成真。问婚恋，大吉。"},
+    {n:"第十四签 · 雾里看月", g:"中", p:"淡雾笼纱月色昏\n看花看月总难真\n且将疑虑收囊底\n雾散终须见月痕", j:"解曰：真相未明。此刻听到的、看到的都作不得准，勿轻信，勿早断。等雾散。"},
+    {n:"第十五签 · 月坠西楼", g:"下", p:"曲终人散月西沉\n楼上空余夜气深\n一事到头须了断\n留连反误再来春", j:"解曰：了结之签。有一段事已到尾声，拖着无益，好好道别。断舍得当，来春另有新月。"},
+    {n:"第十六签 · 月涌大江", g:"上", p:"星垂平野阔无边\n月涌大江流向前\n此去风帆宜早挂\n中流击水正当年", j:"解曰：势起之签（借少陵句起兴）。大势已动，正是出手之时。问事业、迁动、出行，皆宜进。"},
+    {n:"第十七签 · 月照空庭", g:"中平", p:"空庭无人月自来\n阶前花影为谁开\n不须扫径频相候\n该到之时它自来", j:"解曰：等待之签。你等的人、等的信、等的机会，急不来，也跑不掉。安心过日子。"},
+    {n:"第十八签 · 月下花开", g:"上", p:"花向月中开一枝\n暗香浮动正当时\n有情终不负明月\n莫负花期第一枝", j:"解曰：情缘之签。问感情，正是花期：宜表白、宜相见、宜和好。有情人，别错过这个月。"},
+    {n:"第十九签 · 月冷霜天", g:"中", p:"霜天寂寂月如霜\n雁字南飞夜正长\n且把棉衣添一件\n春江水暖有时光", j:"解曰：时机未至，天还冷着。此签劝先照顾好自己：吃饱穿暖，把力气留到开春。"},
+    {n:"第二十签 · 明月入怀", g:"上上", p:"皎皎明月入我怀\n多年心事一时开\n从今不必问圆缺\n月在怀中不用猜", j:"解曰：得偿之签。求什么来什么，长久惦记的事将落定。问姻缘归宿，上吉。"},
+    {n:"第二十一签 · 月行中道", g:"中平", p:"不徐不疾月行天\n万古如斯自泰然\n世人只爱奇峰险\n谁识平平是大贤", j:"解曰：平稳之签。无大喜亦无大忧，平顺即是福。守常道，勿折腾。"},
+    {n:"第二十二签 · 月破云出", g:"上", p:"黑云压城城欲摧\n忽然月破万山开\n眼前难处休惊怕\n转过弯来花自开", j:"解曰：解困之签。正压着你的难处，将在近日松动。再撑一撑，弯就转过来了。"},
+    {n:"第二十三签 · 月晕主风", g:"下", p:"月晕生时风满楼\n行船最忌不回头\n未雨绸缪君记取\n收帆早泊是良谋", j:"解曰：预警之签。近日恐有小风波，非大凶，但宜早做打算：该备份的备份，该缓的缓。"},
+    {n:"第二十四签 · 月印千江", g:"上", p:"一月高悬印千江\n江江各有月光凉\n通得一处心头理\n处处逢源路路长", j:"解曰：通达之签。想通一件事，别的事跟着通。问学问技艺，触类旁通之象。"},
+    {n:"第二十五签 · 月斜疏影", g:"中", p:"疏影横斜水浅清\n月斜不必怨三更\n退他一步天地阔\n让过锋芒事自平", j:"解曰：退让之签。眼下争则两伤，退则海阔。这一步不是输，是绕。"},
+    {n:"第二十六签 · 月到天心", g:"上上", p:"月到天心处\n风来水面时\n一般清意味\n料得少人知", j:"解曰：明澈之签（此签录邵雍《清夜吟》）。心正则事明，所行皆坦途。有此清气，百事可为。"},
+    {n:"第二十七签 · 月随人归", g:"中平", p:"人行月也行\n人停月也停\n万里随君去\n何曾负此心", j:"解曰：相守之签。你惦记的人与事，其实也一路跟着你。不离不弃之象，安心。"},
+    {n:"第二十八签 · 月明星稀", g:"上", p:"月明星自稀\n主事一时归\n删繁能就简\n大道少人非", j:"解曰：聚焦之签。事多则乱。此签劝你只留最亮的那一件，其余暂放。专注则成。"},
+    {n:"第二十九签 · 镜花水月", g:"下", p:"镜里看花花非花\n水中望月月谁家\n劝君莫掷千金去\n留取灯油照晚霞", j:"解曰：防虚耗之签。近期慎防花冤枉钱、耗冤枉情。太美的话别全信，捂好口袋和真心。"},
+    {n:"第三十签 · 月圆人圆", g:"上上", p:"掰开一角是团圆\n月饼香时月满天\n千里同看今夜月\n心头人正在心间", j:"解曰：团圆之签，此筒压轴。所盼之人终将同桌看月。问家和、问重逢、问长久，皆上上。"}
+  ];
+  var cup = document.getElementById("lot-cup");
+  var card = document.getElementById("lot-card");
+  function drawLot(){
+    if(cup.classList.contains("shaking")) return;
+    cup.classList.add("shaking");
+    card.classList.remove("show");
+    setTimeout(function(){
+      cup.classList.remove("shaking");
+      var lot = LOTS[Math.floor(Math.random()*LOTS.length)];
+      document.getElementById("lot-name").textContent = lot.n;
+      document.getElementById("lot-grade").textContent = lot.g+" 签";
+      document.getElementById("lot-poem").textContent = lot.p;
+      document.getElementById("lot-note").textContent = lot.j;
+      card.classList.add("show");
+    }, 1100);
+  }
+  cup.addEventListener("click", drawLot);
+  cup.addEventListener("keydown", function(e){ if(e.key==="Enter"||e.key===" "){e.preventDefault();drawLot();} });
+
+  /* ================= 叩门与内殿 ================= */
+  var PASS = "月亮掰一块就是月饼";
+  var knock = document.getElementById("knock");
+  var knockBox = document.getElementById("knock-box");
+  var knockInput = document.getElementById("knock-input");
+  var sanctum = document.getElementById("sanctum");
+
+  function toggleKnock(){
+    knockBox.classList.toggle("open");
+    if(knockBox.classList.contains("open")) knockInput.focus();
+  }
+  knock.addEventListener("click", toggleKnock);
+  knock.addEventListener("keydown", function(e){ if(e.key==="Enter"||e.key===" "){e.preventDefault();toggleKnock();} });
+
+  function openSanctum(){
+    sanctum.classList.add("open");
+    requestAnimationFrame(function(){ sanctum.classList.add("shown"); });
+    sanctum.setAttribute("aria-hidden","false");
+    document.body.classList.add("sanctum-open");
+  }
+  function closeSanctum(){
+    sanctum.classList.remove("shown");
+    setTimeout(function(){ sanctum.classList.remove("open"); }, 1200);
+    sanctum.setAttribute("aria-hidden","true");
+  }
+
+  knockInput.addEventListener("keydown", function(e){
+    if(e.key!=="Enter") return;
+    var v = knockInput.value.replace(/\s/g,"").replace(/[，。！？,.!?]/g,"");
+    if(v === PASS || v === "月亮掰一块是月饼" || v === "月亮掰一块就是月饼了"){
+      openSanctum();
+      knockInput.value = "";
+      knockBox.classList.remove("open");
+    }else{
+      knockInput.classList.add("wrong");
+      knockInput.value = "";
+      knockInput.placeholder = "月亮没有应答……再想想";
+      setTimeout(function(){ knockInput.classList.remove("wrong"); }, 500);
+    }
+  });
+  document.getElementById("sanctum-close").addEventListener("click", closeSanctum);
+
+  /* ================= 内殿留言板 ================= */
+  var boardList = document.getElementById("board-list");
+  var boardInput = document.getElementById("board-input");
+  var boardEntries = load("temple_board", []);
+
+  function renderPlank(entry){
+    var d = document.createElement("div");
+    d.className = "plank";
+    var dt = document.createElement("div");
+    dt.className = "plank-date";
+    dt.textContent = fmtDate(entry.ts) + " · 鸢儿";
+    var tx = document.createElement("div");
+    tx.className = "plank-text";
+    tx.textContent = entry.text;
+    d.appendChild(dt); d.appendChild(tx);
+    boardList.appendChild(d);
+  }
+  boardEntries.forEach(renderPlank);
+
+  document.getElementById("board-btn").addEventListener("click", function(){
+    var text = boardInput.value.trim();
+    if(!text) return;
+    var entry = { text:text, ts:Date.now() };
+    boardEntries.push(entry);
+    save("temple_board", boardEntries);
+    renderPlank(entry);
+    boardInput.value = "";
+  });
+})();
+</script>
+</body>
+</html>
