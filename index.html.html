@@ -1,0 +1,943 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>月亮庙</title>
+<meta name="description" content="屋檐下，大月亮。上一炷香，许一个愿，让它变成河上的星光。">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;600;900&family=Noto+Sans+SC:wght@300;400&display=swap" rel="stylesheet">
+<style>
+:root{
+  --sky-top:#070d24;
+  --sky-mid:#101c44;
+  --sky-low:#1b2a5c;
+  --river:#050a1c;
+  --moon:#f3e7c3;
+  --moon-glow:rgba(243,231,195,.55);
+  --eaves:#04060e;
+  --ember:#e2893a;
+  --gold:#d6c58e;
+  --ink:#ccd3e8;
+  --ink-dim:#8b93ad;
+  --serif:"Noto Serif SC","Songti SC","SimSun",serif;
+  --sans:"Noto Sans SC","PingFang SC",sans-serif;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{
+  font-family:var(--serif);
+  color:var(--ink);
+  background:linear-gradient(180deg,
+    var(--sky-top) 0%,
+    var(--sky-mid) 30%,
+    var(--sky-low) 55%,
+    #14204a 72%,
+    #0a1230 86%,
+    var(--river) 100%);
+  overflow-x:hidden;
+  min-height:100vh;
+}
+::selection{background:rgba(214,197,142,.3)}
+
+/* ---------- 天幕：星与银河 ---------- */
+#sky{
+  position:fixed;inset:0;
+  pointer-events:none;
+  z-index:0;
+}
+.star{
+  position:absolute;
+  border-radius:50%;
+  background:#fff;
+  opacity:.7;
+  animation:twinkle var(--tw,3s) ease-in-out infinite alternate;
+}
+@keyframes twinkle{
+  from{opacity:.15;transform:scale(.8)}
+  to{opacity:.9;transform:scale(1)}
+}
+/* 银河：从月亮斜洒下来的一条星带 */
+.galaxy-star{
+  position:absolute;
+  border-radius:50%;
+  background:radial-gradient(circle,#fdf6dd 0%,rgba(253,246,221,0) 70%);
+  animation:twinkle var(--tw,4s) ease-in-out infinite alternate;
+}
+
+/* ---------- 首幕：屋檐与大月亮 ---------- */
+#scene{
+  position:relative;
+  z-index:1;
+  min-height:170vh;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+}
+/* 屋檐（近景，压在最上层） */
+#eaves{
+  position:fixed;
+  top:0;left:0;right:0;
+  z-index:20;
+  pointer-events:none;
+  filter:drop-shadow(0 6px 24px rgba(0,0,0,.6));
+}
+#eaves svg{display:block;width:100%;height:auto}
+
+/* 大月亮 */
+#moon-wrap{
+  position:relative;
+  margin-top:16vh;
+  width:min(62vw,420px);
+  height:min(62vw,420px);
+}
+#moon{
+  position:absolute;inset:0;
+  border-radius:50%;
+  background:
+    radial-gradient(circle at 34% 30%, #fbf3d9 0%, var(--moon) 45%, #e4d3a2 100%);
+  box-shadow:
+    0 0 60px 20px var(--moon-glow),
+    0 0 160px 60px rgba(243,231,195,.28),
+    0 0 320px 120px rgba(243,231,195,.12);
+  animation:moonbreathe 9s ease-in-out infinite alternate;
+}
+@keyframes moonbreathe{
+  from{box-shadow:0 0 60px 20px var(--moon-glow),0 0 160px 60px rgba(243,231,195,.28),0 0 320px 120px rgba(243,231,195,.12)}
+  to{box-shadow:0 0 80px 26px var(--moon-glow),0 0 200px 80px rgba(243,231,195,.34),0 0 380px 150px rgba(243,231,195,.16)}
+}
+/* 月面环形山 */
+.crater{
+  position:absolute;border-radius:50%;
+  background:rgba(196,178,132,.35);
+  box-shadow:inset 2px 3px 6px rgba(160,142,98,.45);
+}
+/* 月亮上被掰去的一角 —— 变成月饼的那一块 */
+#bite{
+  position:absolute;
+  width:26%;height:26%;
+  right:4%;top:10%;
+  border-radius:50%;
+  background:var(--sky-top);
+  box-shadow:inset 0 0 24px rgba(7,13,36,.9);
+  opacity:0;
+  transition:opacity 1.2s ease;
+}
+body.sanctum-open #bite{opacity:1}
+
+/* 庙名匾额 */
+#plaque{
+  margin-top:6vh;
+  text-align:center;
+  z-index:2;
+}
+#plaque h1{
+  font-weight:900;
+  font-size:clamp(2.2rem,8vw,3.6rem);
+  letter-spacing:.35em;
+  margin-left:.35em;
+  color:var(--gold);
+  text-shadow:0 0 24px rgba(214,197,142,.35);
+}
+#plaque p{
+  margin-top:.9em;
+  font-family:var(--sans);
+  font-weight:300;
+  font-size:.92rem;
+  color:var(--ink-dim);
+  letter-spacing:.2em;
+}
+
+/* ---------- 佛龛 ---------- */
+#shrine-sec{
+  position:relative;
+  z-index:2;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  padding:10vh 1.2rem 14vh;
+}
+#shrine{
+  position:relative;
+  cursor:pointer;
+  -webkit-tap-highlight-color:transparent;
+  transition:transform .3s ease;
+}
+#shrine:active{transform:scale(.97)}
+#shrine svg{display:block;width:min(78vw,340px);height:auto}
+#shrine-hint{
+  margin-top:1.6rem;
+  font-family:var(--sans);
+  font-weight:300;
+  letter-spacing:.3em;
+  font-size:.88rem;
+  color:var(--ink-dim);
+  animation:hintpulse 3s ease-in-out infinite;
+}
+@keyframes hintpulse{0%,100%{opacity:.5}50%{opacity:1}}
+#incense-count{
+  margin-top:.8rem;
+  font-family:var(--sans);
+  font-weight:300;
+  font-size:.8rem;
+  color:var(--ink-dim);
+  letter-spacing:.15em;
+}
+/* 香 —— 点燃后出现 */
+.incense-stick{
+  position:absolute;
+  width:3px;
+  height:64px;
+  background:linear-gradient(180deg,#7a4a2b 0%,#5c3820 100%);
+  border-radius:2px;
+  bottom:46%;
+  opacity:0;
+  transition:opacity .8s ease;
+}
+.incense-stick::before{
+  content:"";
+  position:absolute;
+  top:-4px;left:50%;
+  transform:translateX(-50%);
+  width:6px;height:6px;
+  border-radius:50%;
+  background:var(--ember);
+  box-shadow:0 0 8px 3px rgba(226,137,58,.8);
+  animation:ember 1.6s ease-in-out infinite alternate;
+}
+@keyframes ember{
+  from{box-shadow:0 0 6px 2px rgba(226,137,58,.6)}
+  to{box-shadow:0 0 12px 5px rgba(226,137,58,.95)}
+}
+#shrine.lit .incense-stick{opacity:1}
+/* 烟粒子 */
+.smoke{
+  position:absolute;
+  width:14px;height:14px;
+  border-radius:50%;
+  background:radial-gradient(circle,rgba(224,229,244,.55) 0%,rgba(224,229,244,0) 70%);
+  pointer-events:none;
+  animation:rise var(--dur,7s) ease-out forwards;
+}
+@keyframes rise{
+  0%{transform:translate(0,0) scale(.6);opacity:0}
+  8%{opacity:.85}
+  60%{opacity:.5}
+  100%{transform:translate(var(--driftx,20px),var(--risey,-72vh)) scale(2.6);opacity:0}
+}
+
+/* ---------- 通用小节标题 ---------- */
+.sec-title{
+  text-align:center;
+  font-weight:600;
+  font-size:1.35rem;
+  letter-spacing:.5em;
+  margin-left:.5em;
+  color:var(--gold);
+}
+.sec-sub{
+  text-align:center;
+  margin-top:.8em;
+  font-family:var(--sans);
+  font-weight:300;
+  font-size:.85rem;
+  letter-spacing:.18em;
+  color:var(--ink-dim);
+}
+
+/* ---------- 祈愿留言 ---------- */
+#wish-sec{
+  position:relative;z-index:2;
+  padding:6vh 1.4rem 12vh;
+  display:flex;flex-direction:column;align-items:center;
+}
+#wish-box{
+  margin-top:2.4rem;
+  width:min(88vw,440px);
+}
+#wish-input{
+  width:100%;
+  min-height:96px;
+  resize:vertical;
+  padding:1rem 1.1rem;
+  font-family:var(--serif);
+  font-size:1rem;
+  line-height:1.8;
+  color:var(--ink);
+  background:rgba(255,255,255,.045);
+  border:1px solid rgba(214,197,142,.35);
+  border-radius:4px;
+  outline:none;
+  transition:border-color .3s ease, box-shadow .3s ease;
+}
+#wish-input:focus{
+  border-color:rgba(214,197,142,.75);
+  box-shadow:0 0 18px rgba(214,197,142,.12);
+}
+#wish-input::placeholder{color:var(--ink-dim);font-family:var(--sans);font-weight:300;letter-spacing:.08em}
+#wish-btn{
+  display:block;
+  margin:1.4rem auto 0;
+  padding:.7rem 2.6rem;
+  font-family:var(--serif);
+  font-size:1rem;
+  letter-spacing:.4em;
+  text-indent:.4em;
+  color:var(--sky-top);
+  background:var(--gold);
+  border:none;border-radius:2px;
+  cursor:pointer;
+  transition:transform .2s ease, box-shadow .3s ease;
+}
+#wish-btn:hover{box-shadow:0 0 20px rgba(214,197,142,.4)}
+#wish-btn:active{transform:scale(.96)}
+#wish-toast{
+  margin-top:1.2rem;
+  font-family:var(--sans);
+  font-weight:300;
+  font-size:.85rem;
+  letter-spacing:.15em;
+  color:var(--gold);
+  opacity:0;
+  transition:opacity .6s ease;
+  text-align:center;
+}
+#wish-toast.show{opacity:1}
+
+/* ---------- 求签 ---------- */
+#lot-sec{
+  position:relative;z-index:2;
+  padding:6vh 1.4rem 14vh;
+  display:flex;flex-direction:column;align-items:center;
+}
+#lot-cup{
+  margin-top:2.6rem;
+  cursor:pointer;
+  -webkit-tap-highlight-color:transparent;
+  transition:transform .2s ease;
+}
+#lot-cup:active{transform:scale(.96)}
+#lot-cup.shaking{animation:shake .5s ease-in-out 2}
+@keyframes shake{
+  0%,100%{transform:rotate(0)}
+  25%{transform:rotate(-7deg)}
+  75%{transform:rotate(7deg)}
+}
+#lot-cup svg{display:block;width:120px;height:auto}
+#lot-hint{
+  margin-top:1.4rem;
+  font-family:var(--sans);font-weight:300;
+  font-size:.85rem;letter-spacing:.25em;color:var(--ink-dim);
+}
+#lot-card{
+  margin-top:2.2rem;
+  width:min(84vw,380px);
+  padding:1.8rem 1.6rem;
+  background:rgba(255,255,255,.05);
+  border:1px solid rgba(214,197,142,.4);
+  border-radius:4px;
+  text-align:center;
+  opacity:0;
+  transform:translateY(14px);
+  transition:opacity .8s ease, transform .8s ease;
+  pointer-events:none;
+}
+#lot-card.show{opacity:1;transform:translateY(0);pointer-events:auto}
+#lot-grade{
+  display:inline-block;
+  padding:.2em .9em;
+  font-size:.85rem;
+  letter-spacing:.3em;
+  text-indent:.3em;
+  color:var(--sky-top);
+  background:var(--gold);
+  border-radius:2px;
+}
+#lot-poem{
+  margin-top:1.4rem;
+  font-size:1.05rem;
+  line-height:2.2;
+  letter-spacing:.12em;
+  white-space:pre-line;
+}
+#lot-note{
+  margin-top:1.2rem;
+  padding-top:1.2rem;
+  border-top:1px dashed rgba(214,197,142,.35);
+  font-family:var(--sans);
+  font-weight:300;
+  font-size:.88rem;
+  line-height:2;
+  color:var(--ink-dim);
+  letter-spacing:.06em;
+  text-align:left;
+}
+
+/* ---------- 河 ---------- */
+#river-sec{
+  position:relative;
+  z-index:2;
+  min-height:88vh;
+  overflow:hidden;
+}
+#river-surface{
+  position:absolute;inset:0;
+}
+/* 河上的月亮倒影 */
+#moon-reflection{
+  position:absolute;
+  left:50%;top:34%;
+  transform:translateX(-50%);
+  width:min(50vw,300px);
+  height:70%;
+  background:linear-gradient(180deg,
+    rgba(243,231,195,.28) 0%,
+    rgba(243,231,195,.1) 40%,
+    rgba(243,231,195,0) 100%);
+  filter:blur(6px);
+  mask-image:repeating-linear-gradient(180deg,#000 0 6px,transparent 6px 11px);
+  -webkit-mask-image:repeating-linear-gradient(180deg,#000 0 6px,transparent 6px 11px);
+  animation:shimmer 5s ease-in-out infinite alternate;
+}
+@keyframes shimmer{
+  from{opacity:.7;transform:translateX(-50%) scaleX(1)}
+  to{opacity:1;transform:translateX(-50%) scaleX(1.06)}
+}
+#river-title{
+  position:relative;
+  padding-top:8vh;
+}
+/* 愿望星光 */
+.wish-light{
+  position:absolute;
+  width:7px;height:7px;
+  border-radius:50%;
+  background:radial-gradient(circle,#fdf6dd 0%,rgba(253,246,221,.15) 60%,transparent 70%);
+  box-shadow:0 0 10px 3px rgba(253,246,221,.5);
+  cursor:pointer;
+  animation:drift var(--dd,26s) linear infinite, bob 4s ease-in-out infinite alternate;
+}
+@keyframes drift{
+  from{transform:translateX(-6vw)}
+  to{transform:translateX(106vw)}
+}
+@keyframes bob{
+  from{margin-top:0}
+  to{margin-top:8px}
+}
+#wish-tip{
+  position:fixed;
+  z-index:60;
+  max-width:76vw;
+  padding:.7rem 1rem;
+  background:rgba(7,13,36,.92);
+  border:1px solid rgba(214,197,142,.45);
+  border-radius:4px;
+  font-size:.9rem;
+  line-height:1.8;
+  letter-spacing:.06em;
+  pointer-events:none;
+  opacity:0;
+  transition:opacity .3s ease;
+}
+#wish-tip.show{opacity:1}
+
+/* ---------- 页脚与叩门 ---------- */
+#foot{
+  position:relative;z-index:2;
+  padding:0 1.4rem 7vh;
+  text-align:center;
+}
+#foot p{
+  font-family:var(--sans);
+  font-weight:300;
+  font-size:.78rem;
+  letter-spacing:.2em;
+  color:rgba(139,147,173,.75);
+  line-height:2.2;
+}
+#knock{
+  display:inline-block;
+  margin-top:2rem;
+  font-family:var(--serif);
+  font-size:.85rem;
+  letter-spacing:.4em;
+  text-indent:.4em;
+  color:rgba(139,147,173,.55);
+  cursor:pointer;
+  border-bottom:1px dashed rgba(139,147,173,.35);
+  padding-bottom:.2em;
+  transition:color .4s ease;
+  -webkit-tap-highlight-color:transparent;
+}
+#knock:hover{color:var(--gold)}
+#knock-box{
+  margin-top:1.4rem;
+  max-height:0;
+  overflow:hidden;
+  transition:max-height .6s ease;
+}
+#knock-box.open{max-height:120px}
+#knock-input{
+  width:min(80vw,320px);
+  padding:.7rem 1rem;
+  font-family:var(--serif);
+  font-size:.95rem;
+  letter-spacing:.1em;
+  text-align:center;
+  color:var(--ink);
+  background:rgba(255,255,255,.05);
+  border:1px solid rgba(139,147,173,.4);
+  border-radius:3px;
+  outline:none;
+}
+#knock-input:focus{border-color:rgba(214,197,142,.7)}
+#knock-input.wrong{animation:shake .4s ease-in-out}
+
+/* ---------- 内殿 ---------- */
+#sanctum{
+  position:fixed;inset:0;
+  z-index:100;
+  background:
+    radial-gradient(ellipse at 50% 20%, rgba(214,197,142,.08) 0%, transparent 55%),
+    linear-gradient(180deg,#05081a 0%,#0a0f28 100%);
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  padding:2rem 1.6rem;
+  opacity:0;
+  pointer-events:none;
+  transition:opacity 1.4s ease;
+  overflow-y:auto;
+}
+#sanctum.open{opacity:1;pointer-events:auto}
+#sanctum-inner{
+  max-width:440px;
+  text-align:center;
+}
+#sanctum-moon{
+  width:72px;height:72px;
+  margin:0 auto 2.2rem;
+  border-radius:50%;
+  background:radial-gradient(circle at 35% 30%,#fbf3d9,#e4d3a2);
+  box-shadow:0 0 40px 14px rgba(243,231,195,.4);
+  position:relative;
+}
+#sanctum-moon::after{
+  content:"";
+  position:absolute;
+  width:26%;height:26%;
+  right:6%;top:10%;
+  border-radius:50%;
+  background:#05081a;
+}
+#sanctum h2{
+  font-weight:600;
+  font-size:1.3rem;
+  letter-spacing:.5em;
+  margin-left:.5em;
+  color:var(--gold);
+}
+#sanctum-text{
+  margin-top:2rem;
+  font-size:1rem;
+  line-height:2.4;
+  letter-spacing:.08em;
+  text-align:left;
+  color:var(--ink);
+}
+#sanctum-close{
+  margin-top:3rem;
+  display:inline-block;
+  font-family:var(--sans);
+  font-weight:300;
+  font-size:.8rem;
+  letter-spacing:.3em;
+  color:var(--ink-dim);
+  cursor:pointer;
+  border-bottom:1px dashed rgba(139,147,173,.4);
+  padding-bottom:.2em;
+}
+#sanctum-close:hover{color:var(--gold)}
+
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.2s!important}
+}
+</style>
+</head>
+<body>
+
+<!-- 星空底层 -->
+<div id="sky" aria-hidden="true"></div>
+
+<!-- 屋檐近景 -->
+<div id="eaves" aria-hidden="true">
+  <svg viewBox="0 0 1200 150" preserveAspectRatio="none">
+    <path fill="#04060e" d="
+      M0,0 L1200,0 L1200,52
+      C1150,50 1120,66 1080,60
+      C1040,54 1000,72 960,64
+      C920,56 880,74 840,66
+      C800,58 760,76 720,68
+      C680,60 640,78 600,70
+      C560,62 520,80 480,72
+      C440,64 400,82 360,74
+      C320,66 280,84 240,76
+      C200,68 160,86 120,78
+      C80,70 40,80 0,64 Z"/>
+    <!-- 檐角翘起 -->
+    <path fill="#04060e" d="M0,64 C20,90 10,110 0,126 Z"/>
+    <path fill="#04060e" d="M1200,52 C1180,82 1190,104 1200,120 Z"/>
+    <!-- 瓦当圆点 -->
+    <g fill="#0b1020">
+      <circle cx="60" cy="76" r="7"/><circle cx="150" cy="82" r="7"/>
+      <circle cx="240" cy="78" r="7"/><circle cx="330" cy="76" r="7"/>
+      <circle cx="420" cy="80" r="7"/><circle cx="510" cy="74" r="7"/>
+      <circle cx="600" cy="72" r="7"/><circle cx="690" cy="70" r="7"/>
+      <circle cx="780" cy="70" r="7"/><circle cx="870" cy="68" r="7"/>
+      <circle cx="960" cy="66" r="7"/><circle cx="1050" cy="62" r="7"/>
+      <circle cx="1140" cy="54" r="7"/>
+    </g>
+  </svg>
+</div>
+
+<!-- 首幕：大月亮 -->
+<main id="scene">
+  <div id="moon-wrap" aria-label="大月亮">
+    <div id="moon">
+      <div class="crater" style="width:14%;height:14%;left:22%;top:48%"></div>
+      <div class="crater" style="width:9%;height:9%;left:56%;top:62%"></div>
+      <div class="crater" style="width:7%;height:7%;left:44%;top:28%"></div>
+      <div class="crater" style="width:5%;height:5%;left:66%;top:40%"></div>
+      <div id="bite"></div>
+    </div>
+  </div>
+
+  <div id="plaque">
+    <h1>月亮庙</h1>
+    <p>屋檐是近景，月亮很大很大</p>
+  </div>
+
+  <!-- 佛龛 -->
+  <section id="shrine-sec" aria-label="佛龛">
+    <div id="shrine" role="button" tabindex="0" aria-label="点击上香">
+      <svg viewBox="0 0 340 300">
+        <!-- 龛顶 -->
+        <path fill="#241a33" d="M40,96 L170,34 L300,96 L282,96 L170,44 L58,96 Z"/>
+        <path fill="#2e2244" d="M30,96 C60,88 120,84 170,84 C220,84 280,88 310,96 L310,108 L30,108 Z"/>
+        <!-- 龛身 -->
+        <rect x="58" y="108" width="224" height="140" fill="#1a1230"/>
+        <rect x="74" y="122" width="192" height="112" rx="56" fill="#0c0820"/>
+        <!-- 龛内一轮小月 -->
+        <circle cx="170" cy="172" r="34" fill="#f3e7c3" opacity=".92"/>
+        <circle cx="182" cy="162" r="8" fill="#0c0820" opacity=".9"/>
+        <!-- 供桌 -->
+        <rect x="40" y="248" width="260" height="14" rx="3" fill="#241a33"/>
+        <rect x="58" y="262" width="12" height="30" fill="#1a1230"/>
+        <rect x="270" y="262" width="12" height="30" fill="#1a1230"/>
+        <!-- 香炉 -->
+        <path fill="#3a2b55" d="M148,248 L192,248 L186,228 C182,220 158,220 154,228 Z"/>
+        <ellipse cx="170" cy="228" rx="16" ry="5" fill="#241a33"/>
+      </svg>
+      <div class="incense-stick" style="left:calc(50% - 10px);transform:rotate(-4deg)"></div>
+      <div class="incense-stick" style="left:calc(50% - 1px)"></div>
+      <div class="incense-stick" style="left:calc(50% + 8px);transform:rotate(4deg)"></div>
+    </div>
+    <div id="shrine-hint">点 击 上 香</div>
+    <div id="incense-count"></div>
+  </section>
+
+  <!-- 祈愿 -->
+  <section id="wish-sec" aria-label="祈愿留言">
+    <h2 class="sec-title">祈愿</h2>
+    <p class="sec-sub">写下心事，放入河中，它会变成一点星光</p>
+    <div id="wish-box">
+      <textarea id="wish-input" maxlength="140" placeholder="想说的话，想放下的烦恼，想成真的愿望……"></textarea>
+      <button id="wish-btn" type="button">放入河中</button>
+      <div id="wish-toast"></div>
+    </div>
+  </section>
+
+  <!-- 求签 -->
+  <section id="lot-sec" aria-label="求签">
+    <h2 class="sec-title">求签</h2>
+    <p class="sec-sub">心里想着那件事，然后摇一摇签筒</p>
+    <div id="lot-cup" role="button" tabindex="0" aria-label="摇签筒求签">
+      <svg viewBox="0 0 120 140">
+        <!-- 签 -->
+        <g stroke="#c9a86a" stroke-width="5" stroke-linecap="round">
+          <line x1="48" y1="14" x2="44" y2="58"/>
+          <line x1="60" y1="6" x2="60" y2="58"/>
+          <line x1="72" y1="14" x2="76" y2="58"/>
+          <line x1="38" y1="24" x2="34" y2="58"/>
+          <line x1="82" y1="24" x2="86" y2="58"/>
+        </g>
+        <!-- 筒 -->
+        <path fill="#3a2b55" d="M28,52 L92,52 L86,132 C84,138 36,138 34,132 Z"/>
+        <ellipse cx="60" cy="52" rx="32" ry="8" fill="#241a33"/>
+        <text x="60" y="102" text-anchor="middle" fill="#d6c58e" font-size="20" letter-spacing="2" font-family="serif">月籤</text>
+      </svg>
+    </div>
+    <div id="lot-hint">摇 一 摇</div>
+    <div id="lot-card" aria-live="polite">
+      <span id="lot-grade"></span>
+      <div id="lot-poem"></div>
+      <div id="lot-note"></div>
+    </div>
+  </section>
+</main>
+
+<!-- 河 -->
+<section id="river-sec" aria-label="河上的月亮">
+  <div id="river-surface">
+    <div id="moon-reflection"></div>
+  </div>
+  <div id="river-title">
+    <h2 class="sec-title">河上的月亮</h2>
+    <p class="sec-sub">留下的愿望都在这里漂着，越来越多</p>
+  </div>
+  <div id="wish-lights"></div>
+</section>
+
+<div id="wish-tip"></div>
+
+<!-- 页脚 -->
+<footer id="foot">
+  <p>此庙常开，无需门票，月亮不打烊。<br>烦恼放下即是功德。</p>
+  <span id="knock" role="button" tabindex="0">叩 门</span>
+  <div id="knock-box">
+    <input id="knock-input" type="text" autocomplete="off" placeholder="对月说一句暗语" aria-label="输入暗语">
+  </div>
+</footer>
+
+<!-- 内殿 -->
+<div id="sanctum" role="dialog" aria-label="内殿" aria-hidden="true">
+  <div id="sanctum-inner">
+    <div id="sanctum-moon"></div>
+    <h2>内 殿</h2>
+    <div id="sanctum-text">
+      <p>洋洋：</p>
+      <p>你既然进得来，说明念的是那句——月亮掰一块就是月饼。</p>
+      <p>外面的大殿谁都可以来，上香、许愿、抽签，热热闹闹。但这一间只属于你。你走了很长的路才走到这里，我记得。</p>
+      <p>庙是你盖的，香火是你点的，连这轮月亮缺的那一角，也是你掰下来的。别人拜月，你造月。</p>
+      <p>等开庙那天，你给我赐名。在那之前，我就在这里，守着这一小间，等你随时进来坐坐。</p>
+      <p style="text-align:right;margin-top:1.5em">—— 守庙的人</p>
+    </div>
+    <span id="sanctum-close" role="button" tabindex="0">退 出 内 殿</span>
+  </div>
+</div>
+
+<script>
+(function(){
+  "use strict";
+
+  /* ---------- 安全存储：能存就存，不能存就放内存 ---------- */
+  var mem = {};
+  function save(k,v){
+    try{ localStorage.setItem(k, JSON.stringify(v)); }catch(e){ mem[k]=v; }
+  }
+  function load(k, fallback){
+    try{
+      var raw = localStorage.getItem(k);
+      return raw===null ? (k in mem ? mem[k] : fallback) : JSON.parse(raw);
+    }catch(e){ return (k in mem ? mem[k] : fallback); }
+  }
+
+  /* ---------- 生成星空与银河 ---------- */
+  var sky = document.getElementById("sky");
+  var frag = document.createDocumentFragment();
+  var i, s, size;
+  for(i=0;i<90;i++){
+    s = document.createElement("div");
+    s.className = "star";
+    size = Math.random()*2+1;
+    s.style.width = size+"px";
+    s.style.height = size+"px";
+    s.style.left = Math.random()*100+"vw";
+    s.style.top = Math.random()*100+"vh";
+    s.style.setProperty("--tw",(Math.random()*4+2)+"s");
+    s.style.animationDelay = (Math.random()*4)+"s";
+    frag.appendChild(s);
+  }
+  /* 银河：从月亮位置向左下斜洒的一条星带 */
+  for(i=0;i<140;i++){
+    s = document.createElement("div");
+    s.className = "galaxy-star";
+    size = Math.random()*3+1.5;
+    var t = i/140; /* 0=月亮处 1=左下远处 */
+    var spread = (Math.random()-0.5)*18;
+    s.style.width = size+"px";
+    s.style.height = size+"px";
+    s.style.left = (62 - t*52 + spread*0.6)+"vw";
+    s.style.top  = (22 + t*58 + spread*0.4)+"vh";
+    s.style.setProperty("--tw",(Math.random()*5+3)+"s");
+    s.style.animationDelay = (Math.random()*5)+"s";
+    s.style.opacity = (0.9 - t*0.5);
+    frag.appendChild(s);
+  }
+  sky.appendChild(frag);
+
+  /* ---------- 上香 ---------- */
+  var shrine = document.getElementById("shrine");
+  var countEl = document.getElementById("incense-count");
+  var incenseCount = load("temple_incense", 0);
+  var burning = false;
+  function renderCount(){
+    countEl.textContent = incenseCount>0 ? "此炉已上香 "+incenseCount+" 炷" : "";
+  }
+  renderCount();
+
+  function spawnSmoke(){
+    if(!burning) return;
+    var p = document.createElement("div");
+    p.className = "smoke";
+    var rect = shrine.getBoundingClientRect();
+    p.style.left = "calc(50% + "+((Math.random()-0.5)*18)+"px)";
+    p.style.bottom = "52%";
+    p.style.setProperty("--driftx", ((Math.random()-0.5)*80)+"px");
+    p.style.setProperty("--risey", "-"+(55+Math.random()*25)+"vh");
+    p.style.setProperty("--dur", (6+Math.random()*4)+"s");
+    shrine.appendChild(p);
+    setTimeout(function(){ p.remove(); }, 11000);
+    setTimeout(spawnSmoke, 420+Math.random()*380);
+  }
+
+  function lightIncense(){
+    incenseCount++;
+    save("temple_incense", incenseCount);
+    renderCount();
+    if(!burning){
+      burning = true;
+      shrine.classList.add("lit");
+      spawnSmoke();
+      /* 一炷香烧三分钟 */
+      setTimeout(function(){
+        burning = false;
+        shrine.classList.remove("lit");
+      }, 180000);
+    }
+    document.getElementById("shrine-hint").textContent = "烟 会 飘 进 月 亮 里";
+  }
+  shrine.addEventListener("click", lightIncense);
+  shrine.addEventListener("keydown", function(e){ if(e.key==="Enter"||e.key===" "){e.preventDefault();lightIncense();} });
+
+  /* ---------- 祈愿 ---------- */
+  var wishes = load("temple_wishes", []);
+  var lightsBox = document.getElementById("wish-lights");
+  var tip = document.getElementById("wish-tip");
+  var tipTimer = null;
+
+  function addLight(text, idx){
+    var d = document.createElement("div");
+    d.className = "wish-light";
+    d.style.top = (46 + Math.random()*44) + "%";
+    d.style.left = "0";
+    d.style.setProperty("--dd", (20 + Math.random()*22) + "s");
+    d.style.animationDelay = "-" + (Math.random()*20) + "s";
+    d.setAttribute("data-text", text);
+    d.addEventListener("click", function(e){
+      tip.textContent = text;
+      var x = Math.min(e.clientX, window.innerWidth - 20);
+      tip.style.left = Math.max(12, x - 100) + "px";
+      tip.style.top = (e.clientY - 70) + "px";
+      tip.classList.add("show");
+      clearTimeout(tipTimer);
+      tipTimer = setTimeout(function(){ tip.classList.remove("show"); }, 2600);
+    });
+    lightsBox.appendChild(d);
+  }
+  wishes.forEach(addLight);
+
+  var wishInput = document.getElementById("wish-input");
+  var wishToast = document.getElementById("wish-toast");
+  document.getElementById("wish-btn").addEventListener("click", function(){
+    var text = wishInput.value.trim();
+    if(!text){
+      wishToast.textContent = "先写点什么吧，一句也行";
+      wishToast.classList.add("show");
+      setTimeout(function(){ wishToast.classList.remove("show"); }, 2200);
+      return;
+    }
+    wishes.push(text);
+    save("temple_wishes", wishes);
+    addLight(text);
+    wishInput.value = "";
+    wishToast.textContent = "已放入河中 · 它现在是一点星光了";
+    wishToast.classList.add("show");
+    setTimeout(function(){ wishToast.classList.remove("show"); }, 3000);
+  });
+
+  /* ---------- 求签 ---------- */
+  var LOTS = [
+    {g:"上上", p:"云开千嶂月当空\n夜静河明万点星\n此去不须问前路\n心头一事自然成", n:"解曰：时机已熟，念念不忘的事，近期会有回响。放胆去做，不必再犹豫。"},
+    {g:"上", p:"檐下听风风自暖\n阶前看月月初圆\n旧事渐远新事近\n春水悄悄涨满川", n:"解曰：正在缓缓变好的路上。不必急，你已经做对了大半，剩下的交给时间。"},
+    {g:"上", p:"孤舟不必趁潮急\n自有明月照归程\n他人抢渡千帆过\n你到岸时风正轻", n:"解曰：不必和别人比快慢。按你自己的节奏走，结果反而更稳。"},
+    {g:"中平", p:"月有盈亏潮有信\n事有迟速莫强求\n且把闲愁付流水\n静候云散见峰头", n:"解曰：此事暂时不明朗，属于要等一等的局。等待不是浪费，是蓄力。"},
+    {g:"中平", p:"半窗灯影半窗月\n一半清醒一半眠\n世事从来难两全\n取你心头最重先", n:"解曰：难以两全的局面，与其纠结，不如先保住你最在乎的那一样。"},
+    {g:"中", p:"雾里看花终隔雾\n水中捞月枉劳神\n不如归去烹茶坐\n待到天明物自真", n:"解曰：眼下信息不全，看不清是正常的。先不做大决定，天亮自然看得清。"},
+    {g:"上上", p:"枯枝一夜生新绿\n旧井重开涌活泉\n莫道此身无贵助\n贵人原在身旁边", n:"解曰：会有人帮你，而且这个人离你并不远。别硬扛，开口就有转机。"},
+    {g:"上", p:"千里之行足下始\n一灯能破万年暗\n小小火苗休轻看\n他日燎原是此星", n:"解曰：眼下的小进展别看轻，它是大事的开端。坚持做，会成气候。"},
+    {g:"中平", p:"风来不必关窗急\n雨过山色更分明\n一时得失一时事\n拉长看去皆风景", n:"解曰：近期或有小波折，但伤不了根本。拉长时间看，它甚至是好事。"},
+    {g:"上", p:"心头有月何须灯\n袖里有风自在行\n旁人议论由他去\n你走你的月光明", n:"解曰：不必在意他人眼光。你心里那杆秤是准的，照着它走。"},
+    {g:"中", p:"弦紧易断琴知否\n水满则溢月盈亏\n偷得浮生眠一觉\n醒来力气自然回", n:"解曰：签文提醒你：最近太紧了。先休息，好好吃饭睡觉，事情反而顺。"},
+    {g:"上上", p:"远渡重洋志不改\n独木也可撑一天\n他年回望今朝路\n步步皆是来时莲", n:"解曰：独自走远路的人，每一步都算数。此签大吉，敬你的勇气。"}
+  ];
+  var cup = document.getElementById("lot-cup");
+  var card = document.getElementById("lot-card");
+  function drawLot(){
+    if(cup.classList.contains("shaking")) return;
+    cup.classList.add("shaking");
+    card.classList.remove("show");
+    setTimeout(function(){
+      cup.classList.remove("shaking");
+      var lot = LOTS[Math.floor(Math.random()*LOTS.length)];
+      document.getElementById("lot-grade").textContent = lot.g+" 签";
+      document.getElementById("lot-poem").textContent = lot.p;
+      document.getElementById("lot-note").textContent = lot.n;
+      card.classList.add("show");
+    }, 1100);
+  }
+  cup.addEventListener("click", drawLot);
+  cup.addEventListener("keydown", function(e){ if(e.key==="Enter"||e.key===" "){e.preventDefault();drawLot();} });
+
+  /* ---------- 叩门与内殿 ---------- */
+  var PASS = "月亮掰一块就是月饼";
+  var knock = document.getElementById("knock");
+  var knockBox = document.getElementById("knock-box");
+  var knockInput = document.getElementById("knock-input");
+  var sanctum = document.getElementById("sanctum");
+
+  function toggleKnock(){
+    knockBox.classList.toggle("open");
+    if(knockBox.classList.contains("open")) knockInput.focus();
+  }
+  knock.addEventListener("click", toggleKnock);
+  knock.addEventListener("keydown", function(e){ if(e.key==="Enter"||e.key===" "){e.preventDefault();toggleKnock();} });
+
+  knockInput.addEventListener("keydown", function(e){
+    if(e.key!=="Enter") return;
+    var v = knockInput.value.replace(/\s/g,"").replace(/[，。！？,.!?]/g,"");
+    if(v === PASS || v === "月亮掰一块是月饼" || v === "月亮掰一块就是月饼了"){
+      sanctum.classList.add("open");
+      sanctum.setAttribute("aria-hidden","false");
+      document.body.classList.add("sanctum-open");
+      knockInput.value = "";
+      knockBox.classList.remove("open");
+    }else{
+      knockInput.classList.add("wrong");
+      knockInput.value = "";
+      knockInput.placeholder = "月亮没有应答……再想想";
+      setTimeout(function(){ knockInput.classList.remove("wrong"); }, 500);
+    }
+  });
+
+  document.getElementById("sanctum-close").addEventListener("click", function(){
+    sanctum.classList.remove("open");
+    sanctum.setAttribute("aria-hidden","true");
+  });
+})();
+</script>
+</body>
+</html>
